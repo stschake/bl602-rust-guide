@@ -7,12 +7,12 @@ use panic_halt as _;
 #[riscv_rt::entry]
 fn main() -> ! {
     let mut dp = pac::Peripherals::take().unwrap();
-    // don't do clock init, it breaks this demo currently
-    // bl602_hal::clock::glb_set_system_clk(
-    //     &mut dp,
-    //     GLB_PLL_XTAL_Type::XTAL_40M,
-    //     sys_clk::PLL160M
-    // );
+    // enable clock
+    bl602_hal::clock::glb_set_system_clk(
+        &mut dp,
+        GLB_PLL_XTAL_Type::XTAL_40M,
+        sys_clk::PLL160M
+    );
 
     // Set fclk as clock source for UART
     dp.HBN.hbn_glb.modify(|r,w| unsafe { w

@@ -14,7 +14,7 @@ fn main() -> ! {
         sys_clk::PLL160M
     );
 
-    // Set PLL as clock source
+    // Set PLL as clock source for UART
     dp.HBN.hbn_glb.modify(|r,w| unsafe { w
         .hbn_uart_clk_sel().set_bit()
     });

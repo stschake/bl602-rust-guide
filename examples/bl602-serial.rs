@@ -20,8 +20,9 @@ fn main() -> ! {
     });
 
     // calculate baudrate
+    let sysclk = bl602_hal::clock::SystemCoreClockGet(&mut dp);
     let uart_clk_div = 0; // reset
-    let baudrate_divisor = 1389;  // 160M / 1 / 1389 = 115200K baud
+    let baudrate_divisor = 2000;  // 160M / 4 / 2000 = 20K baud
     dp.GLB.clk_cfg2.write(|w| unsafe { w
         .uart_clk_div().bits(uart_clk_div)
         .uart_clk_en().set_bit()

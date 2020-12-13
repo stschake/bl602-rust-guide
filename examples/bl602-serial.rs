@@ -7,12 +7,12 @@ use panic_halt as _;
 #[riscv_rt::entry]
 fn main() -> ! {
     let mut dp = pac::Peripherals::take().unwrap();
-    // enable clock
-    bl602_hal::clock::glb_set_system_clk(
-        &mut dp,
-        GLB_PLL_XTAL_Type::XTAL_40M,
-        sys_clk::PLL160M
-    );
+    // don't do clock init, it breaks this demo currently
+    // bl602_hal::clock::glb_set_system_clk(
+    //     &mut dp,
+    //     GLB_PLL_XTAL_Type::XTAL_40M,
+    //     sys_clk::PLL160M
+    // );
 
     // Set fclk as clock source for UART
     dp.HBN.hbn_glb.modify(|r,w| unsafe { w
@@ -20,11 +20,13 @@ fn main() -> ! {
     });
 
     // calculate baudrate
+    let target_baudrate = 19200;
     let sysclk = bl602_hal::clock::SystemCoreClockGet(&mut dp);
-    let uart_clk_div = 0; // reset
-    let baudrate_divisor = 2000;  // 160M / 4 / 2000 = 20K baud
+    let uart_clk_div = 4; // reset
+    let baudrate_divisor = (sysclk / (uart_clk_div + 1) / target_baudrate) as u16;
+    //let baudrate_divisor = 200;  // 160M / 4 / 200 = 20K baud
     dp.GLB.clk_cfg2.write(|w| unsafe { w
-        .uart_clk_div().bits(uart_clk_div)
+        .uart_clk_div().bits(uart_clk_div as u8)
         .uart_clk_en().set_bit()
     });
 

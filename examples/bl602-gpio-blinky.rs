@@ -1,26 +1,27 @@
 #![no_std]
 #![no_main]
 
-use bl602_hal::{pac, prelude::*};
-
+use bl602_hal::{pac, prelude::*, clock::*};
 use panic_halt as _;
-use bl602_hal::delay::McycleDelay;
 #[riscv_rt::entry]
 fn main() -> ! {
     let mut dp = pac::Peripherals::take().unwrap();
-    bl602_hal::clock::glb_set_system_clk(&mut dp);
+    // enable clock
+    bl602_hal::clock::glb_set_system_clk(
+        &mut dp,
+        GLB_PLL_XTAL_Type::XTAL_40M,
+        sys_clk::PLL160M
+    );
+    let sys_clk_freq = bl602_hal::clock::SystemCoreClockGet(&mut dp);
     let parts = dp.GLB.split();
     let mut gpio5 = parts.pin5.into_pull_down_output();
     gpio5.try_set_high().unwrap();
     
-    // We should be running at 160MHz, but the glb_set_system_clk code isn't working correctly
-    // Set the sysclock reg to the freq we are running at
-    dp.HBN.hbn_rsv2.write(|w| unsafe {w.bits(32_000_000)});
-    let current_freq = dp.HBN.hbn_rsv2.read().bits();
+    // Create a blocking delay function based on the current core clock
+    let mut d = bl602_hal::delay::McycleDelay::new(sys_clk_freq);
 
-    let mut d = bl602_hal::delay::McycleDelay::new(current_freq);
     loop {
-        d.try_delay_ms(1000);
+        d.try_delay_ms(1000).unwrap();
         gpio5.try_toggle().unwrap();
     }
 }

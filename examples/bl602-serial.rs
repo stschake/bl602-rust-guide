@@ -1,22 +1,32 @@
 #![no_std]
 #![no_main]
 
-use bl602_hal::pac;
-
+use bl602_hal::{pac, clock::*};
 use panic_halt as _;
 
 #[riscv_rt::entry]
 fn main() -> ! {
-    let dp = pac::Peripherals::take().unwrap();
+    let mut dp = pac::Peripherals::take().unwrap();
     // enable clock
-    // let clock = 160_000_000 as u32;
-    let uart_clk_div = 3; // reset
+    bl602_hal::clock::glb_set_system_clk(
+        &mut dp,
+        GLB_PLL_XTAL_Type::XTAL_40M,
+        sys_clk::PLL160M
+    );
+
+    // Set fclk as clock source
+    dp.HBN.hbn_glb.modify(|r,w| unsafe { w
+        .hbn_uart_clk_sel().clear_bit()
+    });
+
+    // calculate baudrate
+    let uart_clk_div = 0; // reset
+    let baudrate_divisor = 1389;  // 160M / 1 / 1389 = 115200K baud
     dp.GLB.clk_cfg2.write(|w| unsafe { w
         .uart_clk_div().bits(uart_clk_div)
         .uart_clk_en().set_bit()
     });
-    // calculate baudrate
-    let baudrate_divisor = 2000;  // 160M / 4 / 2000 = 20K baud
+
     dp.UART.uart_bit_prd.write(|w| unsafe { w
         .cr_urx_bit_prd().bits(baudrate_divisor - 1)
         .cr_utx_bit_prd().bits(baudrate_divisor - 1)

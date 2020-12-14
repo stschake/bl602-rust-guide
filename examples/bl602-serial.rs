@@ -9,9 +9,8 @@ fn main() -> ! {
     let mut dp = pac::Peripherals::take().unwrap();
     // enable clock
     bl602_hal::clock::glb_set_system_clk(
-        &mut dp,
-        GLB_PLL_XTAL_Type::XTAL_40M,
-        sys_clk::PLL160M
+        GlbPllXtalType::Xtal40m,
+        SysClk::Pll160m
     );
 
     // Set fclk as clock source for UART
@@ -21,7 +20,7 @@ fn main() -> ! {
 
     // calculate baudrate
     let target_baudrate = 19200;
-    let sysclk = bl602_hal::clock::SystemCoreClockGet(&mut dp);
+    let sysclk = bl602_hal::clock::system_core_clock_get();
     let uart_clk_div = 4; // reset
     let baudrate_divisor = (sysclk / (uart_clk_div + 1) / target_baudrate) as u16;
     //let baudrate_divisor = 200;  // 160M / 4 / 200 = 20K baud

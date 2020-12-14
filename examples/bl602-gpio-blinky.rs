@@ -8,11 +8,10 @@ fn main() -> ! {
     let mut dp = pac::Peripherals::take().unwrap();
     // enable clock
     bl602_hal::clock::glb_set_system_clk(
-        &mut dp,
-        GLB_PLL_XTAL_Type::XTAL_40M,
-        sys_clk::PLL160M
+        GlbPllXtalType::Xtal40m,
+        SysClk::Pll160m
     );
-    let sys_clk_freq = bl602_hal::clock::SystemCoreClockGet(&mut dp);
+    let sys_clk_freq = bl602_hal::clock::system_core_clock_get();
     let parts = dp.GLB.split();
     let mut gpio5 = parts.pin5.into_pull_down_output();
     gpio5.try_set_high().unwrap();

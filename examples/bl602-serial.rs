@@ -10,7 +10,7 @@ fn main() -> ! {
     // enable clock
     bl602_hal::clock::glb_set_system_clk(
         GlbPllXtalType::Xtal40m,
-        SysClk::Pll160m
+        SysClk::Pll120m
     );
 
     // Set fclk as clock source for UART
@@ -19,11 +19,13 @@ fn main() -> ! {
     });
 
     // calculate baudrate
-    let target_baudrate = 19200;
+    let target_baudrate = 19200u32;
     let sysclk = bl602_hal::clock::system_core_clock_get();
-    let uart_clk_div = 4; // reset
-    let baudrate_divisor = (sysclk / (uart_clk_div + 1) / target_baudrate) as u16;
-    //let baudrate_divisor = 200;  // 160M / 4 / 200 = 20K baud
+    // Need to ensure baudrate_divisor fits in 16bits.
+    // 120 million / 19200 = 6250 (exactly), which is less than 65535 so we're good
+    let uart_clk_div = 0u8; // reset
+    let baudrate_divisor = (sysclk / (uart_clk_div as u32 + 1) / target_baudrate) as u16;
+
     dp.GLB.clk_cfg2.write(|w| unsafe { w
         .uart_clk_div().bits(uart_clk_div as u8)
         .uart_clk_en().set_bit()

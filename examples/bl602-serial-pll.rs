@@ -8,19 +8,25 @@ use panic_halt as _;
 fn main() -> ! {
     let mut dp = pac::Peripherals::take().unwrap();
     // enable clock
+    // we're using 48Mhz PLL for system clk (fclk) to show that UART is independant
     bl602_hal::clock::glb_set_system_clk(
         GlbPllXtalType::Xtal40m,
-        SysClk::Pll160m
+        SysClk::Pll48m
     );
 
-    // Set PLL as clock source for UART
+    // Set PLL160 as clock source for UART
     dp.HBN.hbn_glb.modify(|r,w| unsafe { w
         .hbn_uart_clk_sel().set_bit()
     });
 
     // calculate baudrate
-    let uart_clk_div = 0; // divide by one
-    let baudrate_divisor = 1389;  // 160M / 1 / 1389 = 115200K baud
+    let target_baudrate = 19200u32;
+    let pll_freq = 160_000_000u32;
+    // Need to ensure baudrate_divisor fits in 16bits.
+    // 160 million / 19200 = 8333.34 (approximately), which is less than 65535 so we're good
+    let uart_clk_div = 0u8; // reset
+    let baudrate_divisor = (pll_freq / (uart_clk_div as u32 + 1) / target_baudrate) as u16;
+
     dp.GLB.clk_cfg2.write(|w| unsafe { w
         .uart_clk_div().bits(uart_clk_div)
         .uart_clk_en().set_bit()

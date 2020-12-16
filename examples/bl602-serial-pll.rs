@@ -10,8 +10,8 @@ fn main() -> ! {
     // enable clock
     // we're using 48Mhz PLL for system clk (fclk) to show that UART is independant
     bl602_hal::clock::glb_set_system_clk(
-        GlbPllXtalType::Xtal40m,
-        SysClk::Pll48m
+        40_000_000u32,
+        48_000_000u32
     );
 
     // Set PLL160 as clock source for UART

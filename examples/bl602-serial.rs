@@ -9,8 +9,8 @@ fn main() -> ! {
     let mut dp = pac::Peripherals::take().unwrap();
     // enable clock
     bl602_hal::clock::glb_set_system_clk(
-        GlbPllXtalType::Xtal40m,
-        SysClk::Pll120m
+        40_000_000u32,
+        120_000_000u32
     );
 
     // Set fclk as clock source for UART

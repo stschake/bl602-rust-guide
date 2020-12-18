@@ -3,15 +3,16 @@
 
 use bl602_hal::{pac, clock::*};
 use panic_halt as _;
+use bl602_hal::prelude::Extensions;
 
 #[riscv_rt::entry]
 fn main() -> ! {
     let mut dp = pac::Peripherals::take().unwrap();
     // enable clock
-    bl602_hal::clock::glb_set_system_clk(
-        40_000_000u32,
-        120_000_000u32
-    );
+    let clock = bl602_hal::clock::Clocks::new()
+        .sys_clk(160_000_000u32.Hz())
+        .use_pll(40_000_000u32.Hz())
+        .freeze();
 
     // Set fclk as clock source for UART
     dp.HBN.hbn_glb.modify(|r,w| unsafe { w

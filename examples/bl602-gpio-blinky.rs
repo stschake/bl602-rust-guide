@@ -3,14 +3,16 @@
 
 use bl602_hal::{pac, prelude::*, clock::*};
 use panic_halt as _;
+use embedded_time::rate;
+
 #[riscv_rt::entry]
 fn main() -> ! {
     let mut dp = pac::Peripherals::take().unwrap();
     // enable clock
-    bl602_hal::clock::glb_set_system_clk(
-        40_000_000u32,
-        160_000_000u32
-    );
+    let clock =  bl602_hal::clock::Clocks::new()
+        .use_pll(40_000_000u32.Hz())
+        .sys_clk(160_000_000u32.Hz())
+        .freeze();
     let sys_clk_freq = bl602_hal::clock::system_core_clock_get();
     let parts = dp.GLB.split();
     let mut gpio5 = parts.pin5.into_pull_down_output();

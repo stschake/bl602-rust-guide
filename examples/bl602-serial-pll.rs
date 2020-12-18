@@ -3,16 +3,17 @@
 
 use bl602_hal::{pac, clock::*};
 use panic_halt as _;
+use bl602_hal::prelude::Extensions;
 
 #[riscv_rt::entry]
 fn main() -> ! {
     let mut dp = pac::Peripherals::take().unwrap();
     // enable clock
     // we're using 48Mhz PLL for system clk (fclk) to show that UART is independant
-    bl602_hal::clock::glb_set_system_clk(
-        40_000_000u32,
-        48_000_000u32
-    );
+    let clock = bl602_hal::clock::Clocks::new()
+        .use_pll(40_000_000u32.Hz())
+        .sys_clk(48_000_000u32.Hz())
+        .freeze();
 
     // Set PLL160 as clock source for UART
     dp.HBN.hbn_glb.modify(|r,w| unsafe { w
@@ -27,10 +28,10 @@ fn main() -> ! {
     let uart_clk_div = 0u8; // reset
     let baudrate_divisor = (pll_freq / (uart_clk_div as u32 + 1) / target_baudrate) as u16;
 
-    dp.GLB.clk_cfg2.write(|w| unsafe { w
-        .uart_clk_div().bits(uart_clk_div)
-        .uart_clk_en().set_bit()
-    });
+    // dp.GLB.clk_cfg2.write(|w| unsafe { w
+    //     .uart_clk_div().bits(uart_clk_div)
+    //     .uart_clk_en().set_bit()
+    // });
 
     dp.UART.uart_bit_prd.write(|w| unsafe { w
         .cr_urx_bit_prd().bits(baudrate_divisor - 1)

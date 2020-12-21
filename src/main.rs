@@ -13,15 +13,16 @@ fn main() -> ! {
     let clocks = Strict::new()
         .use_pll(40_000_000u32.Hz())
         .sys_clk(160_000_000u32.Hz())
-        .uart_clk(40_000_000u32.Hz())
-        .freeze(&mut parts.clk_cfg);
+        .uart_clk(160_000_000u32.Hz())
+        .freeze(&mut parts.clk_cfg)
+        .freeze();
     let pin16 = parts.pin16.into_uart_sig0();
     let pin7 = parts.pin7.into_uart_sig7();
     let mux0 = parts.uart_mux0.into_uart0_tx();
     let mux7 = parts.uart_mux7.into_uart0_rx();
     let mut serial = Serial::uart0(
         dp.UART,
-        Config::default().baudrate(20000.Bd()),
+        Config::default().baudrate(2_000_000.Bd()),
         ((pin16, mux0), (pin7, mux7)),
         clocks
     );

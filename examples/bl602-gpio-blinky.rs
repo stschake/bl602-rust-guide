@@ -3,7 +3,6 @@
 
 use bl602_hal::{pac, prelude::*, clock::*};
 use panic_halt as _;
-use embedded_time::rate;
 
 #[riscv_rt::entry]
 fn main() -> ! {

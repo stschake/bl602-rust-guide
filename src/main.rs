@@ -11,6 +11,9 @@ fn main() -> ! {
     let mut parts = dp.GLB.split();
     // enable clock
     let clocks = Strict::new()
+        .use_pll(40_000_000u32.Hz())
+        .sys_clk(160_000_000u32.Hz())
+        .uart_clk(40_000_000u32.Hz())
         .freeze(&mut parts.clk_cfg);
     let pin16 = parts.pin16.into_uart_sig0();
     let pin7 = parts.pin7.into_uart_sig7();
@@ -24,12 +27,12 @@ fn main() -> ! {
     );
     loop {
         serial.try_write(b'R').ok();
-        serial.try_flush().ok();
+        while !serial.try_flush().is_ok(){};
         serial.try_write(b'U').ok();
-        serial.try_flush().ok();
+        while !serial.try_flush().is_ok(){};
         serial.try_write(b'S').ok();
-        serial.try_flush().ok();
+        while !serial.try_flush().is_ok(){};
         serial.try_write(b'T').ok();
-        serial.try_flush().ok();
+        while !serial.try_flush().is_ok(){};
     }
 }

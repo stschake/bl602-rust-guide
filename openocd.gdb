@@ -16,6 +16,8 @@ mem 0x22030000 0x2204C000 rw
 mem 0x42030000 0x4204C000 rw
 mem 0x23000000 0x23400000 ro
 
+monitor reset halt
+
 load
 
 break _start

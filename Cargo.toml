@@ -11,3 +11,6 @@ riscv-rt = "*"
 bl602-hal = { path = "../bl602-hal" }
 panic-halt = "*"
 riscv = "*"
+embedded-hal = { git = "https://github.com/rust-embedded/embedded-hal" }
+ufmt = "*"
+
